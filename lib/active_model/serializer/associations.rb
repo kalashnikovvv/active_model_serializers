@@ -3,7 +3,7 @@ require 'active_model/default_serializer'
 module ActiveModel
   class Serializer
     class Association
-      def initialize(name, options={})
+      def initialize(name, options={}, &block)
         if options.has_key?(:include)
           ActiveSupport::Deprecation.warn <<-WARN
 ** Notice: include was renamed to embed_in_root. **
@@ -21,8 +21,13 @@ module ActiveModel
         @embed_in_root_key = options.fetch(:embed_in_root_key) { CONFIG.embed_in_root_key }
         @embed_namespace = options.fetch(:embed_namespace) { CONFIG.embed_namespace }
 
-        serializer = @options[:serializer]
-        @serializer_from_options = serializer.is_a?(String) ? serializer.constantize : serializer
+        @serializer_from_options =
+          if block_given?
+            Class.new(ActiveModel::Serializer, &block)
+          else
+            serializer = @options[:serializer]
+            serializer.is_a?(String) ? serializer.constantize : serializer
+          end
       end
 
       attr_reader :name, :embed_ids, :embed_objects

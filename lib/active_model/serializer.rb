@@ -103,17 +103,17 @@ end
         end
       end
 
-      def has_one(*attrs)
-        associate(Association::HasOne, *attrs)
+      def has_one(*attrs, &block)
+        associate(Association::HasOne, *attrs, &block)
       end
 
-      def has_many(*attrs)
-        associate(Association::HasMany, *attrs)
+      def has_many(*attrs, &block)
+        associate(Association::HasMany, *attrs, &block)
       end
 
       private
 
-      def associate(klass, *attrs)
+      def associate(klass, *attrs, &block)
         options = attrs.extract_options!
 
         attrs.each do |attr|
@@ -121,7 +121,7 @@ end
             object.send attr
           end unless method_defined?(attr)
 
-          @_associations[attr] = klass.new(attr, options)
+          @_associations[attr] = klass.new(attr, options, &block)
         end
       end
     end
